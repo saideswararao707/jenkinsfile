@@ -1,0 +1,43 @@
+pipeline
+{
+   agent any
+    stages
+    {
+        stage('contiDown')
+        {
+            steps
+            {
+             git 'https://github.com/IntelliqDevops/mymaven.git'       
+            }
+        }
+        stage('CB')
+        {
+            steps
+            {
+                sh 'mvn package'
+            }
+        }
+        stage('contideploy')
+        {
+            steps
+            {
+                deploy adapters: [tomcat9(credentialsId: 'ebff7510-1374-4abb-919d-b9d8283eaa69', path: '', url: 'http://172.31.89.72:8080')], contextPath: 'test1', war: '**/*.war'
+            }
+        }
+        stage('contitesting')
+        {
+            steps
+            {
+              git 'https://github.com/IntelliqDevops/FunctionalTesting.git'  
+              sh 'java -jar /var/lib/jenkins/workspace/declarative/testing.jar'
+            }
+        }
+        stage('contidelivery')
+        {
+            steps
+            {
+                deploy adapters: [tomcat9(credentialsId: 'ebff7510-1374-4abb-919d-b9d8283eaa69', path: '', url: '')], contextPath: 'prod', war: '**/*.war'
+        }
+    }
+}
+}
